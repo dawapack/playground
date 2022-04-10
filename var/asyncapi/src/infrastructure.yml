@@ -1,0 +1,357 @@
+asyncapi: 2.2.0
+info:
+  title: Infrastructure definitions
+  version: 0.1.0
+  description: This contract will be used by infrastructure thread to declare exchanges, queues and bindings
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  development:
+    url: rabbitmq
+    description: Development server
+    protocol: amqp
+    protocolVersion: 0.9.1
+    security:
+      - user_pass: [ ]
+defaultContentType: application/json
+channels:
+  amqp/default:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: ''
+          type: direct
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  dead/letter/default:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: DeadLetter.Q.Jobs
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  jobresults/outbound/commands:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: JobResults.DX.Commands
+          type: direct
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  authors/outbound/commands:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: Authors.DX.Commands
+          type: direct
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  authors/outbound/responses:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: Authors.DX.Responses
+          type: direct
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  authors/outbound/events:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: Authors.FX.Events
+          type: fanout
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  posts/outbound/commands:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: Posts.DX.Commands
+          type: direct
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  posts/outbound/responses:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: Posts.DX.Responses
+          type: direct
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  posts/outbound/events:
+    bindings:
+      amqp:
+        is: routingKey
+        exchange:
+          name: Posts.FX.Events
+          type: fanout
+          durable: false
+          autoDelete: false
+          vhost: /
+    publish:
+      bindings:
+        amqp:
+          cc: [ ]
+          deliveryMode: 2
+          mandatory: false
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  jobresults/inbound/responses:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: JobResults.Q.Responses
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [
+              'Posts.DX.Responses|JobResults.RK.Response',
+              'Authors.DX.Responses|JobResults.RK.Response',
+          ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  authors/inbound/commands:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: Authors.Q.Commands
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [
+              'Posts.DX.Commands|Authors.RK.Request',
+              'JobResults.DX.Commands|Authors.RK.Request'
+          ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  authors/inbound/responses:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: Authors.Q.Responses
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [ 'Posts.DX.Responses|Authors.RK.Response' ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  authors/inbound/events:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: Authors.Q.Events
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [ 'Posts.FX.Events|Authors.RK.Event' ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  posts/inbound/commands:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: Posts.Q.Commands
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [
+              'Authors.DX.Commands|Posts.RK.Request',
+              'JobResults.DX.Commands|Posts.RK.Request',
+          ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  posts/inbound/responses:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: Posts.Q.Responses
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [ 'Authors.DX.Responses|Posts.RK.Response' ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+  posts/inbound/events:
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: Posts.Q.Events
+          durable: false
+          exclusive: false
+          autoDelete: false
+          vhost: /
+    subscribe:
+      bindings:
+        amqp:
+          cc: [ 'Authors.FX.Events|Posts.RK.Event' ]
+          ack: true
+      message:
+        bindings:
+          amqp:
+            contentEncoding: UTF-8
+            messageType: '#any'
+components:
+  securitySchemes:
+    user_pass:
+      type: userPassword

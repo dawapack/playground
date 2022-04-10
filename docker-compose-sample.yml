@@ -1,0 +1,77 @@
+version: '3.2'
+services:
+  authors:
+    image: dawapack:0.1-authors_dms
+    container_name: authors_dms
+    build:
+      dockerfile: Dockerfile
+      context: ./var/docker
+    stop_grace_period: 30s
+    stdin_open: true
+    tty: true
+    environment:
+      ORIGIN: "eu"
+      REGION: "eu-bucharest-1"
+    volumes:
+      - type: bind
+        source: ./authors-dms
+        target: /var/www
+      - type: bind
+        source: ./var/asyncapi/src
+        target: /var/asyncapi
+  posts:
+    image: dawapack:0.1-posts_dms
+    container_name: posts_dms
+    build:
+      dockerfile: Dockerfile
+      context: ./var/docker
+    stop_grace_period: 30s
+    stdin_open: true
+    tty: true
+    environment:
+      ORIGIN: "eu"
+      REGION: "eu-bucharest-1"
+    volumes:
+      - type: bind
+        source: ./posts-dms
+        target: /var/www
+      - type: bind
+        source: ./var/asyncapi/src
+        target: /var/asyncapi
+  infrastructure:
+    image: dawapack:0.1-infrastrcuture_dms
+    container_name: infrastructure_dms
+    build:
+      dockerfile: Dockerfile
+      context: ./var/docker
+    stop_grace_period: 30s
+    stdin_open: true
+    tty: true
+    environment:
+      ORIGIN: "eu"
+      REGION: "eu-bucharest-1"
+    volumes:
+      - type: bind
+        source: ./infrastructure-dms
+        target: /var/www
+      - type: bind
+        source: ./var/asyncapi/src
+        target: /var/asyncapi
+  rabbitmq:
+    image: rabbitmq:3.9.0-management-alpine
+    container_name: rabbitmq_dms
+    restart: on-failure
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis_dms
+    restart: on-failure
+    command: [ "redis-server", "--appendonly", "yes" ]
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data
+volumes:
+  redis-data:

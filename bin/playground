@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+# stop script if a command exits with a non-zero status
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd ${SCRIPT_DIR}/../ && pwd)"
+SETTINGS_DIR="${ROOT_DIR}/var/dms/settings"
+TEMP_DIR="${ROOT_DIR}/tmp"
+DOCKER_YAML="${ROOT_DIR}/docker-compose.yml"
+
+yes_no_prompt() {
+  while true; do
+    read -p "$1 [Y/n] " yn
+    case $yn in
+    [Yy]*)
+      echo "yes"
+      break
+      ;;
+    [Nn]*)
+      echo "no"
+      break
+      ;;
+    *) echo "Please answer yes or no." ;;
+    esac
+  done
+}
+
+#
+# get dms source from origin git repo, adapt settings and copy source files
+#
+install_dms() {
+  local DMS_SETTINGS_DIR="${SETTINGS_DIR}/$1"
+  local DMS_TEMP_DIR="${TEMP_DIR}/$1"
+  local DMS_DIR="${ROOT_DIR}/dms/$1"
+  local DMS_PROJECT="git@github.com:dawapack/$1-dms-playground.git"
+
+  echo -e "Installing $1-dms-playground >>>>"
+
+  # remove previous installed files
+  uninstall_dms $1
+  mkdir -p ${DMS_TEMP_DIR}
+
+  # clone the repository
+  git clone ${DMS_PROJECT} ${DMS_TEMP_DIR}
+
+  if [ -d "${DMS_TEMP_DIR}/src/" ]; then
+    # move project into the right folder
+    mv ${DMS_TEMP_DIR}/src/ ${DMS_DIR}/src/
+
+    # copy settings
+    cp -r ${DMS_SETTINGS_DIR}/. ${DMS_DIR}/src/
+
+    echo -e "<<<< DMS ready!\n"
+  else
+    echo -e "\n!!! WARNING !!! folders structure mismatch - src folder not found!\n"
+  fi
+
+  # keep clean temporary folder
+  [ -d "${DMS_TEMP_DIR}" ] && rm -Rf ${DMS_TEMP_DIR}
+}
+
+#
+# install all dawapack microservices
+#
+install() {
+  # iterate dms sub-folders
+  for dms_name in $(ls ${ROOT_DIR}/dms); do
+    # has settings folder
+    [ ! -d "${SETTINGS_DIR}/${dms_name}" ] && continue
+    # clone from git repo, copy settings and install
+    install_dms ${dms_name}
+  done
+}
+
+#
+# uninstall dms by removing dms/{name}/src and temporary folders
+#
+uninstall_dms() {
+  local DMS_DIR="${ROOT_DIR}/dms/$1/src"
+  local DMS_TEMP_DIR="${TEMP_DIR}/$1"
+
+  # remove previous installed files
+  [ -d "${DMS_DIR}" ] && rm -Rf ${DMS_DIR} || true
+  [ -d "${DMS_TEMP_DIR}" ] && rm -Rf ${DMS_TEMP_DIR} || true
+}
+
+#
+# uninstall all dawapack microservices source code
+#
+uninstall() {
+  echo -e "Uninstalling all microservices source code >>>>"
+  # iterate dms sub-folders
+  for dms_name in $(ls ${ROOT_DIR}/dms); do
+    echo -e " - ${dms_name}-dms-playground..."
+    uninstall_dms ${dms_name}
+  done
+  echo -e "<<<< Microservices source code uninstalled!\n"
+}
+
+#
+# purge playground
+#
+purge() {
+  # stop playground containers
+  stop
+  # uninstall all microservices source code
+  uninstall
+}
+
+#
+# start playground
+#
+start() {
+  docker-compose -f ${DOCKER_YAML} up || true
+}
+
+#
+# stop playground
+#
+stop() {
+  docker-compose -f ${DOCKER_YAML} down || true
+  #[ "$(yes_no_prompt "Stop playground containers?")" == "yes" ] && docker-compose -f ${DOCKER_YAML} down || true
+}
+
+show_usage() {
+  echo -e "Usage: $0 [COMMAND]"
+  echo -e "Usage: $0 install"
+  echo -e "Usage: $0 uninstall"
+  echo -e "Usage: $0 up"
+  echo -e "Usage: $0 down\n"
+}
+
+case $1 in
+"install") install ;;
+"uninstall") uninstall ;;
+"up") start ;;
+"down") stop ;;
+*) show_usage ;;
+esac

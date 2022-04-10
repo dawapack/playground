@@ -1,0 +1,116 @@
+#
+# Trigger create author sync - operation result can be found in JobResults.Q.Responses
+#
+POST http://localhost:15672/api/exchanges/%2f/JobResults.DX.Commands/publish
+Authorization: Basic guest guest
+Content-Type: application/json
+
+{
+  "properties": {
+    "content_type": "application/json",
+    "content_encoding": "UTF-8",
+    "priority": 0,
+    "delivery_mode": 2,
+    "correlation_id": "6f20d81c-3c8f-4bc1-8088-289f4070d761",
+    "message_id": "e6161192-ad1d-499a-bab5-da8260b7bd9d",
+    "reply_to": "JobResults.Q.Responses",
+    "type": "createAuthor",
+    "headers": {
+      "jobId": "0734cceb-4da9-4f73-b6a2-87481ec435bb",
+      "dateTime": "2022-04-01T12:13:14.156+00:00"
+    }
+  },
+  "routing_key": "Authors.RK.Request",
+  "payload": "{\"firstName\":\"John\",\"lastName\":\"DOE\", \"email\":\"john.doe@gmail.com\"}",
+  "payload_encoding": "string"
+}
+
+###
+
+#
+# Trigger get author by id sync - operation results can be found in JobResults.Q.Responses
+#
+POST http://localhost:15672/api/exchanges/%2f/JobResults.DX.Commands/publish
+Authorization: Basic guest guest
+Content-Type: application/json
+
+{
+  "properties": {
+    "content_type": "application/json",
+    "content_encoding": "UTF-8",
+    "priority": 0,
+    "delivery_mode": 2,
+    "correlation_id": "b8b27631-aed6-4e73-af40-9df611ce03aa",
+    "message_id": "c4ae8d25-9e48-4626-806e-a0844334d74f",
+    "reply_to": "JobResults.Q.Responses",
+    "type": "getAuthor",
+    "headers": {
+      "jobId": "ebe7a6e1-9ac4-42f8-988f-1d7a4350797b",
+      "dateTime": "2022-04-01T12:13:14.156+00:00"
+    }
+  },
+  "routing_key": "Authors.RK.Request",
+  "payload": "{\"pathParams\":{\"authorId\":\"0c165ae7-243a-4e81-aca7-2eb0d6fc28c5\"}}",
+  "payload_encoding": "string"
+}
+
+###
+
+#
+# Trigger update author sync - operation result can be found in JobResults.Q.Responses
+#
+POST http://localhost:15672/api/exchanges/%2f/JobResults.DX.Commands/publish
+Authorization: Basic guest guest
+Content-Type: application/json
+
+{
+  "properties": {
+    "content_type": "application/json",
+    "content_encoding": "UTF-8",
+    "priority": 0,
+    "delivery_mode": 2,
+    "correlation_id": "9cdf7fe0-c85c-4920-bc6f-16250bcacf36",
+    "message_id": "d21d2635-2182-47fd-8e7f-4f9dbf6d3e1b",
+    "reply_to": "JobResults.Q.Responses",
+    "type": "updateAuthor",
+    "headers": {
+      "jobId": "19efb6fc-1649-43d6-a1e1-a9ad6b25496b",
+      "dateTime": "2022-04-01T12:13:14.156+00:00",
+      "x_pathParam_authorId": "0c165ae7-243a-4e81-aca7-2eb0d6fc28c5"
+    }
+  },
+  "routing_key": "Authors.RK.Request",
+  "payload": "{\"firstName\":\"John Maximilian\",\"lastName\":\"DOE\", \"email\":\"john.doe@gmail.com\"}",
+  "payload_encoding": "string"
+}
+
+###
+
+#
+# Trigger delete author sync - operation result can be found in JobResults.Q.Responses
+#
+POST http://localhost:15672/api/exchanges/%2f/JobResults.DX.Commands/publish
+Authorization: Basic guest guest
+Content-Type: application/json
+
+{
+  "properties": {
+    "content_type": "application/json",
+    "content_encoding": "UTF-8",
+    "priority": 0,
+    "delivery_mode": 2,
+    "correlation_id": "d8896823-b7c3-4dcd-9638-46288a6ecac3",
+    "message_id": "f869e593-6098-4564-bb75-bab20b9eaa16",
+    "reply_to": "JobResults.Q.Responses",
+    "type": "deleteAuthor",
+    "headers": {
+      "jobId": "035e3a6f-3e79-4eda-adee-bd6d7687730c",
+      "dateTime": "2022-04-01T12:13:14.156+00:00"
+    }
+  },
+  "routing_key": "Authors.RK.Request",
+  "payload": "{\"pathParams\":{\"authorId\":\"0c165ae7-243a-4e81-aca7-2eb0d6fc28c5\"}}",
+  "payload_encoding": "string"
+}
+
+###
